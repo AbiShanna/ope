@@ -94,7 +94,7 @@ base/mamba_versions.stable:
 	docker run -it --rm $(DARGS) $(PRIVATE_REG)$(IMAGE)$(PRIVATE_TAG) mamba list | tr -d '\r' > $@
 
 base/apt.versions:
-	docker run -it --rm $(DARGS) $(PRIVATE_REG)$(IMAGE)$(PRIVATE_TAG) apt list > $@
+	docker run -it --rm $(DARGS) $(PRIVATE_REG)$(IMAGE)$(PRIVATE_TAG) apt list --installed | awk '{sub(/.now/,"",$1);print $1 "\t" $2}' | tail -n +2> $@
 
 base/aarch64vm/README.md:
 	cd base && wget -O - ${ARCH64VMTGZ} | tar -zxf -
