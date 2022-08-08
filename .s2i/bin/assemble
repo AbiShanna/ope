@@ -10,12 +10,18 @@ set -eo pipefail
 # Execute original assemble script.
 /opt/app-root/builder/assemble
 
+# Also activate ipywidgets/bokeh extension for JupyterLab.
+jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build
+
+
+# jupyter labextension install @bokeh/jupyter_bokeh --no-build
+jupyter lab build
 
 
 # Make sure the S2I source directory is empty as we will use the image
 # produced to run further S2I builds
 
-(shopt -s dotglob ; rm -rf ${APP_ROOT}/src/*)
+#(shopt -s dotglob ; rm -rf ${APP_ROOT}/src/*)
 
 # Fix up permissions.
 

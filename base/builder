@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set -x
+
+set -eo pipefail
+
+echo "........\n\n\n print $@\n\n\n"
+for pkg in $@
+do 
+  if [[ -n "${pkg}" ]] ; then
+    pkg_name=$(echo "$pkg" | cut -d'=' -f1) && pkg_url=$(echo "$pkg" | cut -d'=' -f2) && cd /tmp && rm -rf ${pkg_name}*
+    echo "\n-------------Building ${pkg_name}\n"
+    wget ${pkg_url} && mkdir ${pkg_name} 
+    tar xf ${pkg_name}-*.tar.* -C ${pkg_name} --strip-components 1 
+    if [ "${pkg_name}" = 'gdb' ] ; then
+      cd /tmp/${pkg_name} && ./configure CFLAGS="-I/tmp/gmp/include  -L/tmp/gmp/lib" CXXFLAGS="-I/tmp/gmp/include -L/tmp/gmp/lib" &&  make && make install
+    else 
+      cd /tmp/${pkg_name} && ./configure && make && make install
+    fi
+  fi
+done

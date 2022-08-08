@@ -1,22 +1,28 @@
+
 ## Dockerfile for constructing the base Open Education Effort (OPE)
 ## container.  This container contains everything required for authoring OPE courses
 ## Well is should anyway ;-)
 
-ARG BASE_REG
-ARG BASE_IMAGE
-ARG BASE_TAG
-FROM ${BASE_REG}${BASE_IMAGE}${BASE_TAG}
+ARG FROM_REG
+ARG FROM_IMAGE
+ARG FROM_TAG
+FROM ${FROM_REG}${FROM_IMAGE}${FROM_TAG}
+
+ARG ADDITIONAL_DISTRO_PACKAGES
+ARG BUILD_SRC
+ARG JUPYTER_ENABLE_EXTENSIONS
 
 LABEL name="s2i-odh-ope-base" \
       version="latest" \
       summary="Open Education Effort Customized Jupyter Notebook Source-to-Image for Python 3.9 applications." \
       description="Notebook image based on Source-to-Image.These images can be used in OpenDatahub JupterHub." \
       io.k8s.description="Notebook image based on Source-to-Image.These images can be used in OpenDatahub JupterHub." \
-      io.k8s.display-name="Custom Notebook Python 3.9 S2I" \
+      io.k8s.display-name="Custom Notebook Python 3.8 S2I" \
       io.openshift.expose-services="8888:http" \
-      io.openshift.tags="python,python39" \
+      io.openshift.tags="python,python38" \
       io.openshift.s2i.build.commit.ref="container" \
       io.openshift.s2i.build.source-location="https://github.com/OPEFFORT/ope"
+
 ENV XDG_CACHE_HOME="/opt/app-root/src/.cache" \
     THAMOS_RUNTIME_ENVIRONMENT="" \
     UPGRADE_PIP_TO_LATEST="1" \
@@ -28,33 +34,29 @@ ENV XDG_CACHE_HOME="/opt/app-root/src/.cache" \
     THAMOS_VERBOSE="1" \
     THOTH_PROVENANCE_CHECK="0"
 
+# Fix: https://github.com/hadolint/hadolint/wiki/DL4006
+# Fix: https://github.com/koalaman/shellcheck/wiki/SC3014
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+# Add a "USER root" statement followed by RUN statements to install system packages using apt-get,
+# change file permissions, etc.
+
+# install linux packages that we require for systems classes
 USER root
 
-# Add all build time work that we need to do as root here
-# 1) install linux packages that we need for OPE book development and course materials
-#    FIXME: Right now this is a mess of stuff that JA and OK need for systems classes in addition
-#    to the minimum needed for OPE juypter book authorimg
-
-# minimal-notebook no longer inludes compiler and other tools we we install them
-# and some other standard unix develpment tools
-#  stuff for gdb texinfo libncurses 
-#  ssh
-#  vim 
-#  emacs
-#  6502 tool chain -- includes C compiler, assembler and a linker
-#  file utility -- guesses the type of content in a file -- standard unix tool
-#  man pages
-#  find
-#  we add xterm to pick up resize :-(
+# Insert your changes here.
+RUN yum -y install ${ADDITIONAL_DISTRO_PACKAGES}
 
 # build-essential
-RUN yum -y install texinfo ncurses-devel vim emacs-nox \
-    cc65 man-db man-pages bc xterm gdb cmake gcc-c++ \
-    openssh strace bison flex openssl-devel elfutils-libelf \
-    nasm socat rlwrap qemu-system-aarch64 libgcc.i686 libedit-devel.i686 libbsd && \
-    yum update --assumeyes --nobest --setopt=tsflags=nodocs && \
+RUN yum update --assumeyes --nobest --setopt=tsflags=nodocs && \
     yum --assumeyes clean all && \
     rm -rf /var/cache/dnf
+
+# Installing some system packages from source
+
+COPY base/builder /tmp
+
+RUN cd /tmp && chmod +x builder && ./builder ${BUILD_SRC}
 
 #  adding moria for old time sake
 #  sed '36d' CMakeLists.txt -> Ref: https://github.com/dungeons-of-moria/umoria/issues/44
@@ -75,7 +77,6 @@ ENV PATH=$PATH:/opt/umoria
 RUN [ -e /etc/dnf/dnf.conf ] && sed -i '/tsflags=nodocs/d' /etc/dnf/dnf.conf || true
 RUN dnf -y reinstall "*"
 
-### What Follows is the s2i standard stuff that we want to continue along with
 
 # clean up cache
 RUN rm -rf /var/cache/dnf
@@ -83,6 +84,8 @@ RUN rm -rf /var/cache/dnf
 COPY .s2i/bin /tmp/scripts
 # Copying in source code
 COPY . /tmp/src
+COPY .thoth.yaml /opt/app-root/src/
+COPY .thoth.yaml /opt/app-root
 
 # Change file ownership to the assemble user. Builder image must support chown command.
 RUN chown -R 1001:0 /tmp/scripts /tmp/src
