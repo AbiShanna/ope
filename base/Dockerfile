@@ -73,6 +73,17 @@ RUN cd /tmp && wget https://github.com/dungeons-of-moria/umoria/archive/refs/tag
 
 ENV PATH=$PATH:/opt/umoria
 
+# adding our custom OPE version of RISE for lab -- remove once main RISE is fixed
+RUN curl -sL https://dl.yarnpkg.com/rpm/yarn.repo -o /etc/yum.repos.d/yarn.repo && \
+    dnf -y install yarn
+
+
+RUN git clone https://github.com/OPEFFORT/RISE.git /home/RISE  && \
+    cd /home/RISE && git checkout dev && \
+    yarn install && yarn run build && \
+    pip install -e .
+
+
 ARG FROM_REG
 ARG FROM_IMAGE
 ARG FROM_TAG
@@ -81,6 +92,8 @@ FROM ${FROM_REG}${FROM_IMAGE}${FROM_TAG} AS stage-two
 
 COPY --from=stage-one /usr/local/bin /usr/local/bin
 COPY --from=stage-one /opt/umoria /opt/umoria
+COPY --from=stage-one /home/RISE /home/RISE
+COPY --from=stage-one /opt/app-root/lib/python3.8/site-packages/ /opt/app-root/lib/python3.8/site-packages/
 
 LABEL name="s2i-odh-ope-base" \
       version="latest" \
@@ -148,7 +161,7 @@ COPY Pipfile Pipfile.lock /opt/app-root/src/
 
 # Change file ownership to the assemble user. Builder image must support chown command.
 RUN chown -R student:0 /tmp/scripts /tmp/src /opt/app-root
-USER student
+USER root
 
 RUN /tmp/scripts/assemble
 CMD /tmp/scripts/run
