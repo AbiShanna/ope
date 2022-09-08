@@ -111,9 +111,10 @@ build: DARGS ?= --build-arg FROM_REG=$(BASE_REG) \
                    --build-arg ADDITIONAL_DISTRO_PACKAGES="$(BASE_DISTRO_PACKAGES)" \
                    --build-arg JUPYTER_ENABLE_EXTENSIONS="$(JUPYTER_ENABLE_EXTENSIONS)" \
                    --build-arg BUILD_SRC="$(BUILD_SRC)" \
-                   --build-arg UNMIN=$(UNMIN)
+                   --build-arg UNMIN=$(UNMIN) \
+		   --build-arg MOUNT_DIR=$(MOUNT_DIR)
 build: ## Make the image customized appropriately
-	docker build $(DARGS) $(DCACHING) --rm --force-rm -t $(PRIVATE_REG)$(IMAGE)$(PRIVATE_TAG) .
+	docker build $(DARGS) $(DCACHING) --rm --force-rm -t $(PRIVATE_REG)$(IMAGE)$(PRIVATE_TAG) base
 
 push: IMAGE = $(PRIVATE_IMAGE)
 push: DARGS ?=

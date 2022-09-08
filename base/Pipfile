@@ -1,0 +1,33 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+thamos = "*"
+micropipenv = {extras = ["toml"], version = "*"}
+nbclient = "*"
+jsonschema = "*"
+rise = "*"
+bash-kernel = "*"
+jupyter-book = "*"
+ghp-import = "*"
+jupytext = "*"
+nbgitpuller = "*"
+widgetsnbextension = "*"
+ipywidgets = "*"
+matplotlib = "*"
+anaconda = "*"
+pandas = "*"
+plotly = "*"
+plotly-express = "*"
+jupyterlab-myst = "*"
+jupyterlab-spellchecker = "*"
+jupyter-contrib-nbextensions = "*"
+jupyterthemes = "*"
+nbstripout = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.8"
