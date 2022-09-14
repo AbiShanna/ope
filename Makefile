@@ -42,6 +42,7 @@ PYTHON_PREREQ_VERSIONS_TEST :=
 PYTHON_INSTALL_PACKAGES_TEST := $(shell cat base/python_pkgs)
 
 JUPYTER_ENABLE_EXTENSIONS := $(shell cat base/jupyter_enable_exts)
+JUPYTER_DISABLE_EXTENSIONS := $(shell cat base/jupyter_disable_exts)
 
 # build gdb from source to ensure we get the right version and build with tui support
 GMP_BUILD_SRC := gmp-6.2.1
@@ -110,6 +111,7 @@ build: DARGS ?= --build-arg FROM_REG=$(BASE_REG) \
                    --build-arg OPE_UID=$(OPE_UID) \
                    --build-arg ADDITIONAL_DISTRO_PACKAGES="$(BASE_DISTRO_PACKAGES)" \
                    --build-arg JUPYTER_ENABLE_EXTENSIONS="$(JUPYTER_ENABLE_EXTENSIONS)" \
+                   --build-arg JUPYTER_DISABLE_EXTENSIONS="$(JUPYTER_DISABLE_EXTENSIONS)" \
                    --build-arg BUILD_SRC="$(BUILD_SRC)" \
                    --build-arg UNMIN=$(UNMIN) \
 		   --build-arg MOUNT_DIR=$(MOUNT_DIR)

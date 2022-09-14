@@ -11,7 +11,6 @@ FROM ${FROM_REG}${FROM_IMAGE}${FROM_TAG} AS stage-one
 ARG ADDITIONAL_DISTRO_PACKAGES
 ARG BUILD_SRC
 ARG MOUNT_DIR
-ARG JUPYTER_ENABLE_EXTENSIONS
 
 LABEL name="s2i-odh-ope-base" \
       version="latest" \
@@ -127,6 +126,7 @@ ENV PATH=$PATH:/opt/umoria
 
 ARG MOUNT_DIR
 ARG JUPYTER_ENABLE_EXTENSIONS
+ARG JUPYTER_DISABLE_EXTENSIONS
 
 USER root
 
@@ -161,7 +161,20 @@ COPY Pipfile Pipfile.lock /opt/app-root/src/
 
 # Change file ownership to the assemble user. Builder image must support chown command.
 RUN chown -R student:0 /tmp/scripts /tmp/src /opt/app-root
-USER root
+USER student
+
+USER ${NB_UID}
+
+# enable jupyterlab extensions
+RUN for ext in ${JUPYTER_ENABLE_EXTENSIONS} ; do \
+   jupyter nbextension enable "$ext" ; \
+   done
+
+# disable extensions -- disabling core extensions can be really useful for customizing
+#                       jupyterlab user experience
+RUN for ext in ${JUPYTER_DISABLE_EXTENSIONS} ; do \
+   jupyter labextension disable "$ext" ; \
+   done
 
 RUN /tmp/scripts/assemble
 CMD /tmp/scripts/run
