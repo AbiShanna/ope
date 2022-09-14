@@ -21,6 +21,22 @@ We have the base directory that includes files like requirements, and other conf
 
 - makefile -defines the set of commands/targets to run against the base image, described in the user guide.
 
+## Docker build process
+
+The container template is created over two stages to achieve better organization and to reduce size. 
+
+**Stage one:**
+- Add libraries required to install/build development dependencies
+
+**Stage two:**
+- Copy the final binary folders from stage-one.
+- Include artifacts(executables, configs) from local
+- Enable jupyter extensions
+- Foler permissions
+
+
+The final image created after second stage contains only the required binaries, the process looks like :<br/>
+<br/><img src="docker_build.png" alt="folder_structure" width="600" height="350" /><br/>
 
 ## User Guide
 
@@ -40,8 +56,10 @@ This repo utilizes make tool to efficiently build, run, tag and publish the jupy
 
 ### Adding system libraries
 [Distribution packages](.base/distro_pkgs) listed here installs the system libraries during the build time.
-### Jupyter extensions to be enabled
-The list of jupyter extensions to be enabled can be updated in the [extensions](.base/jupyter_enable_exts) file.
+### Jupyter extensions to be enabled/disabled
+The list of jupyter extensions to be enabled can be updated in the [enable extensions](.base/jupyter_enable_exts) file.
+</br> The list of jupyter extensions to be disabled can be updated in the [disable extensions](.base/jupyter_disable_exts) file.
+
 ### Launching in desktop
 To run the published public image in your local workstation that has docker running, 
 - Clone the git repository
