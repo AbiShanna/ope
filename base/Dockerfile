@@ -141,8 +141,8 @@ RUN dnf -y reinstall "*"
 # Change default user to student
 #RUN sed -i 's|^default.*|default:x:1001:0:Default Student User:/home/default:/bin/bash|' /etc/passwd
 
-RUN useradd -g root -m -d /home/student -s /bin/bash student
-RUN sed -i 's|^\([[:blank:]]*echo.*\)|    echo "student:x:${USER_ID}:0:Default Student User:/home/student:/bin/bash" >> $NSS_WRAPPER_PASSWD|' ${MOUNT_DIR}/../etc/generate_container_user
+#RUN useradd -g root -m -d /home/student -s /bin/bash student
+#RUN sed -i 's|^\([[:blank:]]*echo.*\)|    echo "student:x:${USER_ID}:0:Default Student User:/home/student:/bin/bash" >> $NSS_WRAPPER_PASSWD|' ${MOUNT_DIR}/../etc/generate_container_user
 
 # copy overrides.json
 COPY settings ${MOUNT_DIR}/../share/jupyter/lab/settings
@@ -160,8 +160,8 @@ COPY .thoth.yaml /opt/app-root
 COPY Pipfile Pipfile.lock /opt/app-root/src/
 
 # Change file ownership to the assemble user. Builder image must support chown command.
-RUN chown -R student:0 /tmp/scripts /tmp/src /opt/app-root
-USER student
+#RUN chown -R student:0 /tmp/scripts /tmp/src /opt/app-root
+#USER student
 
 USER ${NB_UID}
 

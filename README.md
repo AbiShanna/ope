@@ -21,6 +21,11 @@ We have the base directory that includes files like requirements, and other conf
 
 - makefile -defines the set of commands/targets to run against the base image, described in the user guide.
 
+## Customizing this repo
+This OPE repo acts like as generic template for creating customized jupyter notebook images that can be deployed in an OpenShift managed cloud environment.
+<br/><br/> &nbsp;&nbsp;  To customize and author materials, one can clone the OPE/container branch and can from there create more branches based on the local repo for each<br/> environment like development, testing, production etc. 
+<br/> <br/><img src='repo_lineage.png' width=550 height=350>
+
 ## Docker build process
 
 The container template is created over two stages to achieve better organization and to reduce size. 
