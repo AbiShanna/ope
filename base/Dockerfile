@@ -89,6 +89,19 @@ ARG FROM_TAG
 
 FROM ${FROM_REG}${FROM_IMAGE}${FROM_TAG} AS stage-two
 
+ARG OPE_UID
+ARG OPE_GID
+ARG OPE_GROUP
+ENV OPE_UID=${OPE_UID}
+ARG NB_UID=${OPE_UID}
+ENV NB_UID=${NB_UID}
+ENV OPE_GID=${OPE_GID}
+ARG NB_GID=${OPE_GID}
+ENV NB_GID=${NB_GID}
+ENV OPE_GROUP=${OPE_GROUP}
+ARG NB_GROUP=${OPE_GROUP}
+ENV NB_GROUP=${NB_GROUP}
+
 COPY --from=stage-one /usr/local/bin /usr/local/bin
 COPY --from=stage-one /opt/umoria /opt/umoria
 COPY --from=stage-one /home/RISE /home/RISE
@@ -138,16 +151,6 @@ USER root
 RUN [ -e /etc/dnf/dnf.conf ] && sed -i '/tsflags=nodocs/d' /etc/dnf/dnf.conf || true
 RUN dnf -y reinstall "*"
 
-# Change default user to student
-#RUN sed -i 's|^default.*|default:x:1001:0:Default Student User:/home/default:/bin/bash|' /etc/passwd
-
-#RUN useradd -g root -m -d /home/student -s /bin/bash student
-#RUN sed -i 's|^\([[:blank:]]*echo.*\)|    echo "student:x:${USER_ID}:0:Default Student User:/home/student:/bin/bash" >> $NSS_WRAPPER_PASSWD|' ${MOUNT_DIR}/../etc/generate_container_user
-
-# copy overrides.json
-COPY settings ${MOUNT_DIR}/../share/jupyter/lab/settings
-RUN fix-permissions ${MOUNT_DIR}/../share/jupyter/lab/settings
-
 # clean up cache
 RUN rm -rf /var/cache/dnf
 
@@ -159,11 +162,15 @@ COPY .thoth.yaml /opt/app-root/src/
 COPY .thoth.yaml /opt/app-root
 COPY Pipfile Pipfile.lock /opt/app-root/src/
 
-# Change file ownership to the assemble user. Builder image must support chown command.
-#RUN chown -R student:0 /tmp/scripts /tmp/src /opt/app-root
-#USER student
+# one more fix permissions for good measure ;-)
+RUN  fix-permissions "/home/${NB_USER}" && \
+     fix-permissions "/home/RISE" 
+
+RUN chown -R ${OPE_UID}:0 ${MOUNT_DIR} /tmp/src/
+RUN sed -i '/^default.*/d' /etc/passwd
 
 USER ${NB_UID}
+
 
 # enable jupyterlab extensions
 RUN for ext in ${JUPYTER_ENABLE_EXTENSIONS} ; do \
@@ -176,5 +183,15 @@ RUN for ext in ${JUPYTER_DISABLE_EXTENSIONS} ; do \
    jupyter labextension disable "$ext" ; \
    done
 
+# copy overrides.json
+COPY settings ${MOUNT_DIR}/../share/jupyter/lab/settings
+
+# Add ARM development environtment
+COPY aarch64vm /home/aarch64vm
+
+RUN fix-permissions  ${MOUNT_DIR}/../share/jupyter/lab/settings
 RUN /tmp/scripts/assemble
-CMD /tmp/scripts/run
+RUN /tmp/scripts/run &
+
+
+
