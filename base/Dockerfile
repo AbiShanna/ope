@@ -52,9 +52,6 @@ RUN yum update --assumeyes --nobest --setopt=tsflags=nodocs && \
     yum --assumeyes clean all && \
     rm -rf /var/cache/dnf
 
-# creating a new user for student
-
-
 
 # Installing some system packages from source
 COPY builder /tmp
@@ -140,6 +137,7 @@ ENV PATH=$PATH:/opt/umoria
 ARG MOUNT_DIR
 ARG JUPYTER_ENABLE_EXTENSIONS
 ARG JUPYTER_DISABLE_EXTENSIONS
+ARG ADDITIONAL_DISTRO_PACKAGES
 
 USER root
 
@@ -153,6 +151,14 @@ RUN dnf -y reinstall "*"
 
 # clean up cache
 RUN rm -rf /var/cache/dnf
+
+# Insert your changes here.
+RUN yum -y install ${ADDITIONAL_DISTRO_PACKAGES}
+
+# build-essential
+RUN yum update --assumeyes --nobest --setopt=tsflags=nodocs && \
+    yum --assumeyes clean all && \
+    rm -rf /var/cache/dnf
 
 # Copying in override assemble/run scripts
 COPY .s2i/bin /tmp/scripts
@@ -190,8 +196,8 @@ COPY settings ${MOUNT_DIR}/../share/jupyter/lab/settings
 COPY aarch64vm /home/aarch64vm
 
 RUN fix-permissions  ${MOUNT_DIR}/../share/jupyter/lab/settings
-RUN /tmp/scripts/assemble
-RUN /tmp/scripts/run &
+#RUN /tmp/scripts/assemble
+#RUN /tmp/scripts/run &
 
 
 

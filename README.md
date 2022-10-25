@@ -1,6 +1,6 @@
 # Getting started
 
-This quick reference guide shows how to leveraging this repo to customize the [source-to-image](https://github.com/openshift/source-to-image) jupyter notebook builder image for OpenDatahub JupyterHub. This branch creates a fedora based s2i builder image for the jupyter container that takes the [textbook content](https://github.com/jappavoo/UndertheCovers) and generate a new image which can be deployed in ODH environment. 
+This quick guide to leverage this repo to customize the [source-to-image](https://github.com/openshift/source-to-image) jupyter notebook builder image for OpenDatahub JupyterHub. This branch creates an ubuntu based s2i builder image for the jupyter container that takes the [textbook content](https://github.com/jappavoo/UndertheCovers) and generate a new image which can be deployed in ODH environment. 
 
 >**_Note:_** This container is only a template and does not contain the textbook content.
 
@@ -12,12 +12,12 @@ We have the base directory that includes files like requirements, and other conf
 
 Listing significant configurations part of the build process.
 - base-image: 
-	* **quay.iothoth-station/s2i-minimal-py38-notebook:latest** is the base image used, configured as: <base_registry>/<base_image>:<base_tag>
+	* **docker.io/jupyter/minimal-notebook:2022-07-07** is the base image used, configured as: <base_registry>/<base_image>:<base_tag>
 	* The respective files as available under folder 'base'
 - Adding system libraries:
 	* Distribution package listed in 'base/distro_pkgs' installs the system libraries during the build time
-	* Packages that cannot be installed using yum and need to be build from source should be updated to 'base/build_pkgs_frm_src'
 - Adding python libraries:
+   * List of pre-requisites that should be installed before other python libraries to be updated in 'base/python_prereqs'
    * To specify python libraries update 'base/python_prereqs' file
 - Jupter extensions:
    * Extensions to be **enabled** - 'base/jupyter_enable_etxs'
@@ -28,8 +28,8 @@ Listing significant configurations part of the build process.
 - makefile -defines the set of commands/targets to run against the base image, described in a separate section.
 
 ## Customizing this repo
-&nbsp;&nbsp;  This OPE repo acts like as generic template for creating customized jupyter notebook images that can be deployed in an OpenShift managed cloud environment.
-<br/><br/> &nbsp;&nbsp;  To customize and author materials, one can clone the OPE/container branch and can from there create more branches based on the local repo for each<br/> environment like development, testing, production etc. 
+&nbsp;&nbsp;  This UndertheCovers repo is customized from [OPE/container-jupyter-docker-stacks](https://github.com/OPEFFORT/ope/tree/container-jupyter-docker-stacks) for [UndertheCovers](https://github.com/jappavoo/UndertheCovers/tree/main) textbook content.
+<br/><br/> &nbsp;&nbsp;  This repo includes additional libraries to support the content. Further customization available as branches with a prefix **'container-'** includes the deployment environment specific configurations like development, testing, production etc. 
 <br/> <br/><img src='repo_lineage.png' width=550 height=350>
 
 #### Updating default user id:
@@ -81,6 +81,5 @@ To run the published public image in your local workstation that has docker runn
 - Update the base/ope_uid with that of your local user id
 - Build the image using 'make CUST=local build'
 - Launch the container using 'make CUST=local run'
-
 
 
