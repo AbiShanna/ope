@@ -56,16 +56,10 @@ RUN yum update --assumeyes --nobest --setopt=tsflags=nodocs && \
 # Installing some system packages from source
 COPY builder /tmp
 
-RUN cd /tmp && chmod +x builder && ./builder ${BUILD_SRC}
+#RUN cd /tmp && chmod +x builder && ./builder ${BUILD_SRC}
 
 #  adding moria for old time sake
 #  sed '36d' CMakeLists.txt -> Ref: https://github.com/dungeons-of-moria/umoria/issues/44
-RUN cd /tmp && wget https://github.com/dungeons-of-moria/umoria/archive/refs/tags/v5.7.15.tar.gz \
-    && tar -zxf v5.7.15.tar.gz && cd umoria-5.7.15 && sed -i '36d' CMakeLists.txt \
-    && cmake . && make \
-    && mv umoria /opt/umoria \
-    && ln -s /opt/umoria/umoria /opt/umoria/moria \
-    && cd /tmp && rm -rf v5.7.15 && rm v5.7.15.tar.gz
 
 ENV PATH=$PATH:/opt/umoria
 
@@ -78,6 +72,7 @@ RUN git clone https://github.com/OPEFFORT/RISE.git /home/RISE  && \
     cd /home/RISE && git checkout dev && \
     yarn install && yarn run build && \
     pip install -e .
+
 
 
 ARG FROM_REG
@@ -100,9 +95,6 @@ ARG NB_GROUP=${OPE_GROUP}
 ENV NB_GROUP=${NB_GROUP}
 
 COPY --from=stage-one /usr/local/bin /usr/local/bin
-COPY --from=stage-one /opt/umoria /opt/umoria
-COPY --from=stage-one /home/RISE /home/RISE
-COPY --from=stage-one /opt/app-root/lib/python3.8/site-packages/ /opt/app-root/lib/python3.8/site-packages/
 
 LABEL name="s2i-odh-ope-base" \
       version="latest" \
@@ -131,7 +123,6 @@ ENV XDG_CACHE_HOME="/opt/app-root/src/.cache" \
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 
-ENV PATH=$PATH:/opt/umoria
 
 
 ARG MOUNT_DIR
@@ -196,8 +187,8 @@ COPY settings ${MOUNT_DIR}/../share/jupyter/lab/settings
 COPY aarch64vm /home/aarch64vm
 
 RUN fix-permissions  ${MOUNT_DIR}/../share/jupyter/lab/settings
-#RUN /tmp/scripts/assemble
-#RUN /tmp/scripts/run &
+RUN /tmp/scripts/assemble
+RUN /tmp/scripts/run &
 
 
 
