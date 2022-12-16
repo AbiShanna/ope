@@ -12,7 +12,7 @@ We have the base directory that includes files like requirements, and other conf
 
 Listing significant configurations part of the build process.
 - base-image: 
-	* **docker.io/jupyter/minimal-notebook:2022-07-07** is the base image used, configured as: <base_registry>/<base_image>:<base_tag>
+	* **thoth-station/s2i-minimal-py38-notebook:latest** is the base image used, configured as: <base_registry>/<base_image>:<base_tag>
 	* The respective files as available under folder 'base'
 - Adding system libraries:
 	* Distribution package listed in 'base/distro_pkgs' installs the system libraries during the build time
